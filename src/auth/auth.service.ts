@@ -1,8 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as argon2 from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/users/dto/user.model';
+import * as argon2 from 'argon2';
+import { ErrorConstants } from 'src/constants/error.constants';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -11,19 +13,25 @@ export class AuthService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(
+    username: string,
+    password: string,
+  ): Promise<Omit<User, 'password'>> {
     const user = await this.prisma.user.findFirst({
       where: { username: username },
     });
 
-    if (user && (await argon2.verify(user.password, password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result;
+    if (!user) {
+      return null;
     }
-    return null;
+
+    if (!argon2.verify(user.password, password)) {
+      return null;
+    }
+
+    return user;
   }
-  s;
+
   async login(user: any) {
     const payload = { username: user.username, sub: user.userId };
     return {
@@ -41,7 +49,7 @@ export class AuthService {
     });
 
     if (exists) {
-      throw new ConflictException('username already exists');
+      throw ErrorConstants.ERROR_001;
     }
     const emailExists = await this.prisma.user.findUnique({
       where: {
@@ -50,7 +58,7 @@ export class AuthService {
     });
 
     if (emailExists) {
-      throw new ConflictException('email already used');
+      throw ErrorConstants.ERROR_002;
     }
 
     const newUser = await this.prisma.user.create({
