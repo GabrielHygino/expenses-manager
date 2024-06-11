@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login-user.dto';
 import { CreateUserDto } from '../users/dto/user.model';
+import { User } from '@prisma/client';
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -30,7 +31,12 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should return access_token if credentials are valid', async () => {
       const loginDto: LoginDto = { username: 'testuser', password: 'password' };
-      const mockUser = { username: 'testuser', userId: 1 };
+      const mockUser: Omit<User, 'password'> = {
+        id: 1,
+        username: 'testuser',
+        email: 'test@example.com',
+      };
+
       const mockToken = { access_token: 'jwt-token' };
 
       jest.spyOn(authService, 'validateUser').mockResolvedValue(mockUser);
