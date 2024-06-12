@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     AuthModule,
     UsersModule,
+    TransactionsModule,
   ],
   providers: [
     {

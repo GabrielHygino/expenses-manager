@@ -13,9 +13,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TransactionType {
+  EXPENSE
+  ENTRANCE
+}
+
 model User {
   id       Int    @id @default(autoincrement())
   password String
   username String @unique
   email    String @unique
+}
+
+model Transaction {
+  id          Int             @id @default(autoincrement())
+  description String
+  value       Int
+  type        TransactionType
 }
